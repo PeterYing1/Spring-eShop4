@@ -7,7 +7,7 @@ setlocal EnableDelayedExpansion
 ::    run_local.cmd              — build all + start full stack
 ::    run_local.cmd infra        — start infrastructure only (SQL, Redis, Mongo, RabbitMQ, Keycloak)
 ::    run_local.cmd build        — Maven build only (no Docker Compose start)
-::    run_local.cmd up           — docker compose up (skip Maven build)
+::    run_local.cmd up           — docker compose up with image rebuild (skip Maven build)
 ::    run_local.cmd down         — stop and remove all containers
 ::    run_local.cmd logs [svc]   — tail logs (all services, or one named service)
 ::    run_local.cmd status       — show running containers and open URLs

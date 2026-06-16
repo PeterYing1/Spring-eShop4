@@ -52,10 +52,6 @@
         "http://host.docker.internal:5100/*",
         "http://localhost:5100/*"
       ],
-      "postLogoutRedirectUris": [
-        "http://host.docker.internal:5100/*",
-        "http://localhost:5100/*"
-      ],
       "defaultClientScopes": ["openid", "profile", "email"],
       "optionalClientScopes": ["offline_access", "orders", "basket", "locations", "marketing", "webshoppingagg", "orders.signalrhub", "webhooks"]
     },
@@ -68,10 +64,6 @@
       "standardFlowEnabled": true,
       "implicitFlowEnabled": false,
       "redirectUris": [
-        "http://host.docker.internal:5114/*",
-        "http://localhost:5114/*"
-      ],
-      "postLogoutRedirectUris": [
         "http://host.docker.internal:5114/*",
         "http://localhost:5114/*"
       ],

@@ -49,9 +49,22 @@ services:
     image: datalust/seq:latest
     environment:
       ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_ADMINPASSWORD: "admin"
     ports:
       - "5341:5341"
       - "5380:80"
+    networks:
+      - eshop-network
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    depends_on:
+      - sqldata
+    environment:
+      ACCEPT_EULA: "Y"
+    volumes:
+      - ./services/db-init/init.sh:/init.sh
+    entrypoint: ["/bin/bash", "/init.sh"]
     networks:
       - eshop-network
 
@@ -71,7 +84,7 @@ services:
     networks:
       - eshop-network
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5105/realms/eshop/.well-known/openid-configuration || exit 1"]
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/5105 && printf \"GET /realms/eshop/.well-known/openid-configuration HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n\" >&3 && timeout 5 cat <&3 | grep -q 200'"]
       interval: 30s
       timeout: 10s
       retries: 10
@@ -99,8 +112,8 @@ services:
       CATALOG_AZURE_STORAGE_ENABLED: "false"
       SERVER_PORT: 5101
     depends_on:
-      sqldata:
-        condition: service_started
+      db-init:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_started
     networks:
@@ -152,8 +165,8 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
       SERVER_PORT: 5102
     depends_on:
-      sqldata:
-        condition: service_started
+      db-init:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_started
       identity-api:
@@ -179,8 +192,8 @@ services:
       ORDERING_GRACE_PERIOD_MS: 15000
       SERVER_PORT: 5111
     depends_on:
-      sqldata:
-        condition: service_started
+      db-init:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_started
     networks:
@@ -247,8 +260,8 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
       SERVER_PORT: 5110
     depends_on:
-      sqldata:
-        condition: service_started
+      db-init:
+        condition: service_completed_successfully
       nosqldata:
         condition: service_started
       rabbitmq:
@@ -301,8 +314,8 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
       SERVER_PORT: 5113
     depends_on:
-      sqldata:
-        condition: service_started
+      db-init:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_started
       identity-api:
@@ -433,8 +446,8 @@ services:
       IDENTITY_URL: "http://identity-api:5105"
       IDENTITY_EXTERNAL_URL: "http://host.docker.internal:5105"
       SIGNALR_HUB_URL: "http://host.docker.internal:5200/hub/notificationhub"
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_ESHOP_ISSUER_URI: "http://identity-api:5105/realms/eshop"
-      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_ESHOP_REDIRECT_URI: "http://host.docker.internal:5100/login/oauth2/code/eshop"
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECT_URI: "http://host.docker.internal:5100/login/oauth2/code/keycloak"
       SERVER_PORT: 5100
     depends_on:
       webshoppingapigw:
