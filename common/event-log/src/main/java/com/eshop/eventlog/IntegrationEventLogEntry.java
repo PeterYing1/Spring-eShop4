@@ -59,7 +59,7 @@ public class IntegrationEventLogEntry {
     private int timesSent = 0;
 
     /** Timestamp when the entry was first created. */
-    @Column(name = "CreationTime", nullable = false)
+    @Column(name = "CreationTime", nullable = false, columnDefinition = "datetime2")
     private Instant creationTime;
 
     /**

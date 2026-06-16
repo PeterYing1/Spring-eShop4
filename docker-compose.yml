@@ -111,6 +111,7 @@ services:
       CATALOG_PIC_BASE_URL: "http://host.docker.internal:5101/api/v1/catalog/items/[0]/pic/"
       CATALOG_AZURE_STORAGE_ENABLED: "false"
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5101
     depends_on:
       db-init:
@@ -165,6 +166,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5102
     depends_on:
       db-init:
@@ -193,6 +195,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       ORDERING_GRACE_PERIOD_MS: 15000
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5111
     depends_on:
       db-init:
@@ -262,6 +265,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5110
     depends_on:
       db-init:
@@ -317,6 +321,7 @@ services:
       SPRING_RABBITMQ_PASSWORD: guest
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5113
     depends_on:
       db-init:
