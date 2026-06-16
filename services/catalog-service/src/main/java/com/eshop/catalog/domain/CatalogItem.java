@@ -53,14 +53,14 @@ public class CatalogItem {
     @Column(name = "CatalogTypeId", nullable = false)
     private Integer catalogTypeId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CatalogTypeId", insertable = false, updatable = false)
     private CatalogType catalogType;
 
     @Column(name = "CatalogBrandId", nullable = false)
     private Integer catalogBrandId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "CatalogBrandId", insertable = false, updatable = false)
     private CatalogBrand catalogBrand;
 

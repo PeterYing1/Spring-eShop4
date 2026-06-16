@@ -77,6 +77,10 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HTTP_PORT: 5105
+      KC_HOSTNAME: "host.docker.internal"
+      KC_HOSTNAME_PORT: "5105"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
     volumes:
       - ./services/identity-service/keycloak-realm:/opt/keycloak/data/import
     ports:
@@ -136,7 +140,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SERVER_PORT: 5103
     depends_on:
       basketdata:
@@ -164,7 +168,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
       SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5102
@@ -217,7 +221,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SERVER_PORT: 5112
     depends_on:
       rabbitmq:
@@ -263,7 +267,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
       SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5110
@@ -292,7 +296,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SERVER_PORT: 5109
     depends_on:
       nosqldata:
@@ -319,7 +323,7 @@ services:
       SPRING_RABBITMQ_PORT: 5672
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SPRING_JPA_HIBERNATE_NAMING_PHYSICAL_STRATEGY: "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl"
       SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SERVER_PORT: 5113
@@ -347,7 +351,7 @@ services:
       URLS_BASKET: "http://basket-api:5103"
       URLS_ORDERS: "http://ordering-api:5102"
       URLS_IDENTITY: "http://identity-api:5105"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SERVER_PORT: 5121
     depends_on:
       catalog-api:
@@ -373,7 +377,7 @@ services:
       URLS_BASKET: "http://basket-api:5103"
       URLS_ORDERS: "http://ordering-api:5102"
       URLS_IDENTITY: "http://identity-api:5105"
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SERVER_PORT: 5122
     depends_on:
       catalog-api:
@@ -456,8 +460,9 @@ services:
       IDENTITY_URL: "http://identity-api:5105"
       IDENTITY_EXTERNAL_URL: "http://host.docker.internal:5105"
       SIGNALR_HUB_URL: "http://host.docker.internal:5200/hub/notificationhub"
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_KEYCLOAK_REDIRECT_URI: "http://host.docker.internal:5100/login/oauth2/code/keycloak"
+      SPRING_JACKSON_MAPPER_ACCEPT_CASE_INSENSITIVE_PROPERTIES: "true"
       SERVER_PORT: 5100
     depends_on:
       webshoppingapigw:
@@ -522,7 +527,7 @@ services:
     environment:
       WEBHOOKS_API_URL: "http://webhooks-api:5113"
       SELF_URL: "http://host.docker.internal:5114"
-      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_ESHOP_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_ESHOP_ISSUER_URI: "http://host.docker.internal:5105/realms/eshop"
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_ESHOP_REDIRECT_URI: "http://host.docker.internal:5114/login/oauth2/code/eshop"
       SERVER_PORT: 5114
     depends_on:
