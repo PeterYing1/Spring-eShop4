@@ -1,0 +1,520 @@
+version: '3.9'
+
+services:
+
+  # ─── Infrastructure ───────────────────────────────────────────────────────────
+
+  sqldata:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Pass@word"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqldata:/var/opt/mssql
+    networks:
+      - eshop-network
+
+  nosqldata:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - nosqldata:/data/db
+    networks:
+      - eshop-network
+
+  basketdata:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - basketdata:/data
+    networks:
+      - eshop-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - eshop-network
+
+  seq:
+    image: datalust/seq:latest
+    environment:
+      ACCEPT_EULA: "Y"
+    ports:
+      - "5341:5341"
+      - "5380:80"
+    networks:
+      - eshop-network
+
+  # ─── Identity ─────────────────────────────────────────────────────────────────
+
+  identity-api:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 5105
+    volumes:
+      - ./services/identity-service/keycloak-realm:/opt/keycloak/data/import
+    ports:
+      - "5105:5105"
+    networks:
+      - eshop-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5105/realms/eshop/.well-known/openid-configuration || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # ─── Backend Services ─────────────────────────────────────────────────────────
+
+  catalog-api:
+    build:
+      context: .
+      dockerfile: services/catalog-service/Dockerfile
+    image: eshop/catalog-service:latest
+    ports:
+      - "5101:5101"
+      - "9101:9101"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqldata:1433;databaseName=CatalogDb;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: "Pass@word"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      CATALOG_PIC_BASE_URL: "http://host.docker.internal:5101/api/v1/catalog/items/[0]/pic/"
+      CATALOG_AZURE_STORAGE_ENABLED: "false"
+      SERVER_PORT: 5101
+    depends_on:
+      sqldata:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - eshop-network
+
+  basket-api:
+    build:
+      context: .
+      dockerfile: services/basket-service/Dockerfile
+    image: eshop/basket-service:latest
+    ports:
+      - "5103:5103"
+      - "9103:9103"
+    environment:
+      SPRING_DATA_REDIS_HOST: basketdata
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5103
+    depends_on:
+      basketdata:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  ordering-api:
+    build:
+      context: .
+      dockerfile: services/ordering-service/Dockerfile
+    image: eshop/ordering-service:latest
+    ports:
+      - "5102:5102"
+      - "9102:9102"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqldata:1433;databaseName=OrderingDb;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: "Pass@word"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5102
+    depends_on:
+      sqldata:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  ordering-backgroundtasks:
+    build:
+      context: .
+      dockerfile: services/ordering-background-service/Dockerfile
+    image: eshop/ordering-background-service:latest
+    ports:
+      - "5111:5111"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqldata:1433;databaseName=OrderingDb;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: "Pass@word"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      ORDERING_GRACE_PERIOD_MS: 15000
+      SERVER_PORT: 5111
+    depends_on:
+      sqldata:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - eshop-network
+
+  ordering-signalrhub:
+    build:
+      context: .
+      dockerfile: services/ordering-notification-service/Dockerfile
+    image: eshop/ordering-notification-service:latest
+    ports:
+      - "5112:5112"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5112
+    depends_on:
+      rabbitmq:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  payment-api:
+    build:
+      context: .
+      dockerfile: services/payment-service/Dockerfile
+    image: eshop/payment-service:latest
+    ports:
+      - "5108:5108"
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      PAYMENT_PAYMENT_SUCCEEDED: "true"
+      SERVER_PORT: 5108
+    depends_on:
+      rabbitmq:
+        condition: service_started
+    networks:
+      - eshop-network
+
+  marketing-api:
+    build:
+      context: .
+      dockerfile: services/marketing-service/Dockerfile
+    image: eshop/marketing-service:latest
+    ports:
+      - "5110:5110"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqldata:1433;databaseName=MarketingDb;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: "Pass@word"
+      SPRING_DATA_MONGODB_URI: "mongodb://nosqldata:27017/MarketingDb"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5110
+    depends_on:
+      sqldata:
+        condition: service_started
+      nosqldata:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  locations-api:
+    build:
+      context: .
+      dockerfile: services/location-service/Dockerfile
+    image: eshop/location-service:latest
+    ports:
+      - "5109:5109"
+    environment:
+      SPRING_DATA_MONGODB_URI: "mongodb://nosqldata:27017/LocationsDb"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5109
+    depends_on:
+      nosqldata:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  webhooks-api:
+    build:
+      context: .
+      dockerfile: services/webhooks-service/Dockerfile
+    image: eshop/webhooks-service:latest
+    ports:
+      - "5113:5113"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqldata:1433;databaseName=WebhooksDb;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: "Pass@word"
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5113
+    depends_on:
+      sqldata:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  # ─── BFF Aggregators ──────────────────────────────────────────────────────────
+
+  webshoppingagg:
+    build:
+      context: .
+      dockerfile: gateways/web-shopping-aggregator/Dockerfile
+    image: eshop/web-shopping-aggregator:latest
+    ports:
+      - "5121:5121"
+    environment:
+      URLS_CATALOG: "http://catalog-api:5101"
+      URLS_BASKET: "http://basket-api:5103"
+      URLS_ORDERS: "http://ordering-api:5102"
+      URLS_IDENTITY: "http://identity-api:5105"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5121
+    depends_on:
+      catalog-api:
+        condition: service_started
+      basket-api:
+        condition: service_started
+      ordering-api:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  mobileshoppingagg:
+    build:
+      context: .
+      dockerfile: gateways/mobile-shopping-aggregator/Dockerfile
+    image: eshop/mobile-shopping-aggregator:latest
+    ports:
+      - "5122:5122"
+    environment:
+      URLS_CATALOG: "http://catalog-api:5101"
+      URLS_BASKET: "http://basket-api:5103"
+      URLS_ORDERS: "http://ordering-api:5102"
+      URLS_IDENTITY: "http://identity-api:5105"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SERVER_PORT: 5122
+    depends_on:
+      catalog-api:
+        condition: service_started
+      basket-api:
+        condition: service_started
+      ordering-api:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  # ─── Envoy API Gateways ───────────────────────────────────────────────────────
+
+  webshoppingapigw:
+    image: envoyproxy/envoy:v1.29-latest
+    volumes:
+      - ./gateways/envoy/webshopping/envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "5200:80"
+      - "8080:8001"
+    networks:
+      - eshop-network
+    depends_on:
+      - webshoppingagg
+      - catalog-api
+      - basket-api
+      - ordering-api
+
+  webmarketingapigw:
+    image: envoyproxy/envoy:v1.29-latest
+    volumes:
+      - ./gateways/envoy/webmarketing/envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "5201:80"
+    networks:
+      - eshop-network
+    depends_on:
+      - marketing-api
+      - locations-api
+
+  mobileshoppingapigw:
+    image: envoyproxy/envoy:v1.29-latest
+    volumes:
+      - ./gateways/envoy/mobileshopping/envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "5202:80"
+    networks:
+      - eshop-network
+    depends_on:
+      - mobileshoppingagg
+      - catalog-api
+      - basket-api
+      - ordering-api
+
+  mobilemarketingapigw:
+    image: envoyproxy/envoy:v1.29-latest
+    volumes:
+      - ./gateways/envoy/mobilemarketing/envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "5203:80"
+    networks:
+      - eshop-network
+    depends_on:
+      - marketing-api
+
+  # ─── Web Applications ─────────────────────────────────────────────────────────
+
+  webmvc:
+    build:
+      context: .
+      dockerfile: web/webmvc-app/Dockerfile
+    image: eshop/webmvc-app:latest
+    ports:
+      - "5100:5100"
+    environment:
+      WEBSHOPPINGAGG_URL: "http://webshoppingapigw:80"
+      WEBMARKETINGAGG_URL: "http://webmarketingapigw:80"
+      IDENTITY_URL: "http://identity-api:5105"
+      IDENTITY_EXTERNAL_URL: "http://host.docker.internal:5105"
+      SIGNALR_HUB_URL: "http://host.docker.internal:5200/hub/notificationhub"
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_ESHOP_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_ESHOP_REDIRECT_URI: "http://host.docker.internal:5100/login/oauth2/code/eshop"
+      SERVER_PORT: 5100
+    depends_on:
+      webshoppingapigw:
+        condition: service_started
+      webmarketingapigw:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+  webspa:
+    build:
+      context: .
+      dockerfile: web/webspa-host/Dockerfile
+    image: eshop/webspa-host:latest
+    ports:
+      - "5104:5104"
+    environment:
+      SPA_PURCHASE_URL: "http://host.docker.internal:5200"
+      SPA_MARKETING_URL: "http://host.docker.internal:5201"
+      SPA_IDENTITY_URL: "http://host.docker.internal:5105"
+      SPA_CALLBACK_URL: "http://host.docker.internal:5104"
+      SPA_SIGNALR_HUB_URL: "http://host.docker.internal:5200/hub/notificationhub"
+      SERVER_PORT: 5104
+    networks:
+      - eshop-network
+
+  webstatus:
+    build:
+      context: .
+      dockerfile: web/webstatus-app/Dockerfile
+    image: eshop/webstatus-app:latest
+    ports:
+      - "5107:5107"
+    environment:
+      CATALOG_API_URL: "http://catalog-api:5101"
+      BASKET_API_URL: "http://basket-api:5103"
+      ORDERING_API_URL: "http://ordering-api:5102"
+      IDENTITY_API_URL: "http://identity-api:5105"
+      MARKETING_API_URL: "http://marketing-api:5110"
+      LOCATIONS_API_URL: "http://locations-api:5109"
+      PAYMENT_API_URL: "http://payment-api:5108"
+      ORDERING_BG_URL: "http://ordering-backgroundtasks:5111"
+      ORDERING_SIGNALR_URL: "http://ordering-signalrhub:5112"
+      WEBHOOKS_API_URL: "http://webhooks-api:5113"
+      WEBMVC_URL: "http://webmvc:5100"
+      WEBSPA_URL: "http://webspa:5104"
+      WEBSHOPPINGAGG_URL: "http://webshoppingagg:5121"
+      MOBILESHOPPINGAGG_URL: "http://mobileshoppingagg:5122"
+      SERVER_PORT: 5107
+    networks:
+      - eshop-network
+
+  webhooks-client:
+    build:
+      context: .
+      dockerfile: web/webhook-client-app/Dockerfile
+    image: eshop/webhook-client-app:latest
+    ports:
+      - "5114:5114"
+    environment:
+      WEBHOOKS_API_URL: "http://webhooks-api:5113"
+      SELF_URL: "http://host.docker.internal:5114"
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_ESHOP_ISSUER_URI: "http://identity-api:5105/realms/eshop"
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_ESHOP_REDIRECT_URI: "http://host.docker.internal:5114/login/oauth2/code/eshop"
+      SERVER_PORT: 5114
+    depends_on:
+      webhooks-api:
+        condition: service_started
+      identity-api:
+        condition: service_healthy
+    networks:
+      - eshop-network
+
+networks:
+  eshop-network:
+    driver: bridge
+
+volumes:
+  sqldata:
+  nosqldata:
+  basketdata:

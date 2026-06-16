@@ -1,0 +1,407 @@
+{
+  "realm": "eshop",
+  "enabled": true,
+  "displayName": "eShop",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "accessTokenLifespan": 7200,
+  "ssoSessionIdleTimeout": 1800,
+  "ssoSessionMaxLifespan": 36000,
+  "clientSessionIdleTimeout": 0,
+  "clientSessionMaxLifespan": 0,
+  "roles": {
+    "realm": [
+      { "name": "user", "description": "User privileges" },
+      { "name": "admin", "description": "Administrator privileges" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "js",
+      "name": "eShop SPA OpenId Client",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5104/*",
+        "http://localhost:5104/*"
+      ],
+      "webOrigins": [
+        "http://host.docker.internal:5104",
+        "http://localhost:5104"
+      ],
+      "defaultClientScopes": ["openid", "profile", "email"],
+      "optionalClientScopes": ["orders", "basket", "locations", "marketing", "webshoppingagg", "orders.signalrhub", "webhooks"]
+    },
+    {
+      "clientId": "mvc",
+      "name": "MVC Client",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5100/*",
+        "http://localhost:5100/*"
+      ],
+      "postLogoutRedirectUris": [
+        "http://host.docker.internal:5100/*",
+        "http://localhost:5100/*"
+      ],
+      "defaultClientScopes": ["openid", "profile", "email"],
+      "optionalClientScopes": ["offline_access", "orders", "basket", "locations", "marketing", "webshoppingagg", "orders.signalrhub", "webhooks"]
+    },
+    {
+      "clientId": "webhooksclient",
+      "name": "Webhooks Client",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret",
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5114/*",
+        "http://localhost:5114/*"
+      ],
+      "postLogoutRedirectUris": [
+        "http://host.docker.internal:5114/*",
+        "http://localhost:5114/*"
+      ],
+      "defaultClientScopes": ["openid", "profile"],
+      "optionalClientScopes": ["offline_access", "webhooks"]
+    },
+    {
+      "clientId": "basketswaggerui",
+      "name": "Basket Swagger UI",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5103/*",
+        "http://localhost:5103/*"
+      ],
+      "defaultClientScopes": [],
+      "optionalClientScopes": ["basket"]
+    },
+    {
+      "clientId": "orderingswaggerui",
+      "name": "Ordering Swagger UI",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5102/*",
+        "http://localhost:5102/*"
+      ],
+      "defaultClientScopes": [],
+      "optionalClientScopes": ["orders"]
+    },
+    {
+      "clientId": "webshoppingaggswaggerui",
+      "name": "Web Shopping Aggregator Swagger UI",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5121/*",
+        "http://localhost:5121/*"
+      ],
+      "defaultClientScopes": [],
+      "optionalClientScopes": ["webshoppingagg", "basket"]
+    },
+    {
+      "clientId": "mobileshoppingaggswaggerui",
+      "name": "Mobile Shopping Aggregator Swagger UI",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5122/*",
+        "http://localhost:5122/*"
+      ],
+      "defaultClientScopes": [],
+      "optionalClientScopes": ["mobileshoppingagg"]
+    },
+    {
+      "clientId": "locationsswaggerui",
+      "name": "Locations Swagger UI",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5109/*",
+        "http://localhost:5109/*"
+      ],
+      "defaultClientScopes": [],
+      "optionalClientScopes": ["locations"]
+    },
+    {
+      "clientId": "marketingswaggerui",
+      "name": "Marketing Swagger UI",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5110/*",
+        "http://localhost:5110/*"
+      ],
+      "defaultClientScopes": [],
+      "optionalClientScopes": ["marketing"]
+    },
+    {
+      "clientId": "webhooksswaggerui",
+      "name": "WebHooks Swagger UI",
+      "enabled": true,
+      "publicClient": true,
+      "implicitFlowEnabled": true,
+      "standardFlowEnabled": false,
+      "redirectUris": [
+        "http://host.docker.internal:5113/*",
+        "http://localhost:5113/*"
+      ],
+      "defaultClientScopes": [],
+      "optionalClientScopes": ["webhooks"]
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "orders",
+      "description": "Orders Service",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    },
+    {
+      "name": "basket",
+      "description": "Basket Service",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    },
+    {
+      "name": "marketing",
+      "description": "Marketing Service",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    },
+    {
+      "name": "locations",
+      "description": "Locations Service",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    },
+    {
+      "name": "mobileshoppingagg",
+      "description": "Mobile Shopping Aggregator",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    },
+    {
+      "name": "webshoppingagg",
+      "description": "Web Shopping Aggregator",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    },
+    {
+      "name": "orders.signalrhub",
+      "description": "Ordering SignalR Hub",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    },
+    {
+      "name": "webhooks",
+      "description": "Webhooks Service",
+      "protocol": "openid-connect",
+      "attributes": { "include.in.token.scope": "true" }
+    }
+  ],
+  "users": [
+    {
+      "username": "demouser@microsoft.com",
+      "email": "demouser@microsoft.com",
+      "emailVerified": true,
+      "enabled": true,
+      "firstName": "DemoUser",
+      "lastName": "eShop",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Pass@word1",
+          "temporary": false
+        }
+      ],
+      "attributes": {
+        "card_number": ["4012888888881881"],
+        "security_number": ["535"],
+        "expiration": ["12/21"],
+        "card_holder_name": ["DemoUser"],
+        "card_type": ["1"],
+        "street": ["15703 NE 61st Ct"],
+        "city": ["Redmond"],
+        "state": ["WA"],
+        "country": ["U.S."],
+        "zip_code": ["98052"],
+        "name": ["DemoUser"],
+        "last_name": ["eShop"]
+      },
+      "realmRoles": ["user"]
+    }
+  ],
+  "protocolMappers": [
+    {
+      "name": "card_number",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "card_number",
+        "claim.name": "card_number",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "card_holder_name",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "card_holder_name",
+        "claim.name": "card_holder_name",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "card_type",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "card_type",
+        "claim.name": "card_type",
+        "jsonType.label": "int",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "expiration",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "expiration",
+        "claim.name": "expiration",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "security_number",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "security_number",
+        "claim.name": "security_number",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "street",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "street",
+        "claim.name": "street",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "city",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "city",
+        "claim.name": "city",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "state",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "state",
+        "claim.name": "state",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "country",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "country",
+        "claim.name": "country",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "zip_code",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "zip_code",
+        "claim.name": "zip_code",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    },
+    {
+      "name": "last_name",
+      "protocol": "openid-connect",
+      "protocolMapper": "oidc-usermodel-attribute-mapper",
+      "config": {
+        "user.attribute": "last_name",
+        "claim.name": "last_name",
+        "jsonType.label": "String",
+        "id.token.claim": "true",
+        "access.token.claim": "true",
+        "userinfo.token.claim": "true"
+      }
+    }
+  ]
+}

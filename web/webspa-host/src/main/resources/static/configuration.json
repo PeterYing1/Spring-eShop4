@@ -1,0 +1,10 @@
+{
+  "identityUrl": "http://localhost:5105/realms/eshop",
+  "catalogUrl": "http://localhost/catalog-api",
+  "orderingUrl": "http://localhost/ordering-api",
+  "basketUrl": "http://localhost/basket-api",
+  "marketingUrl": "http://localhost/marketing-api",
+  "locationsUrl": "http://localhost/locations-api",
+  "notificationsUrl": "http://localhost/notificationhub",
+  "activateCampaignDetailFunction": false
+}

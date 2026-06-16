@@ -1,0 +1,38 @@
+server:
+  port: 5108
+
+spring:
+  application:
+    name: payment-service
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+payment:
+  payment-succeeded: true
+
+eshop:
+  event-bus:
+    exchange-name: eshop_event_bus
+    queue-name: Payment
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

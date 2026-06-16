@@ -1,0 +1,40 @@
+# Test profile — overrides for integration tests using Testcontainers.
+# Datasource URL, username, password and RabbitMQ coordinates are injected
+# at runtime via @DynamicPropertySource; the values below are placeholders
+# that prevent Spring Boot from failing during context initialisation before
+# the containers are started.
+
+spring:
+  datasource:
+    url: "jdbc:sqlserver://localhost:1433;databaseName=CatalogDb;encrypt=false;trustServerCertificate=true"
+    username: sa
+    password: Pass@word1
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+  # Disable JWT issuer-uri validation — no real IdP available in integration tests.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri:
+
+catalog:
+  pic-base-url: "http://localhost/api/v1/catalog/items/[0]/pic/"
+  azure-storage-enabled: false
+  use-customization-data: false
+
+eshop:
+  event-bus:
+    queue-name: Catalog

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>eShop SPA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 90%;
+        }
+        h1 { color: #e44d26; }
+        p { color: #666; }
+        ol { text-align: left; color: #444; line-height: 1.8; }
+        code {
+            background: #f0f0f0;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .status {
+            margin-top: 1.5rem;
+            padding: 0.75rem 1rem;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 4px;
+            color: #2e7d32;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>eShop SPA</h1>
+        <p>The Angular SPA has not been built yet.</p>
+        <p>To build and serve the Angular app:</p>
+        <ol>
+            <li>Navigate to <code>C:\Projects\eShopOnContainers\src\Web\WebSPA\Client</code></li>
+            <li>Run <code>npm install</code></li>
+            <li>Run <code>npm run build:prod</code></li>
+            <li>Copy the contents of <code>dist/</code> to
+                <code>web/webspa-host/src/main/resources/static/</code></li>
+            <li>Rebuild the Spring Boot jar and restart.</li>
+        </ol>
+        <div class="status">
+            The Spring Boot host is running correctly at port 5104.
+        </div>
+    </div>
+</body>
+</html>

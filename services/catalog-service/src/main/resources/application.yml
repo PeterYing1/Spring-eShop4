@@ -1,0 +1,62 @@
+server:
+  port: 5101
+
+spring:
+  application:
+    name: catalog-service
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=CatalogDb;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: Pass@word
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+eshop:
+  event-bus:
+    queue-name: Catalog
+
+catalog:
+  pic-base-url: "http://localhost:5101/api/v1/catalog/items/[0]/pic/"
+  azure-storage-enabled: false
+  use-customization-data: false
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

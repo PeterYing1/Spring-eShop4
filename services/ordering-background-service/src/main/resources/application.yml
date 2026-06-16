@@ -1,0 +1,44 @@
+server:
+  port: 5111
+
+spring:
+  application:
+    name: ordering-backgroundtasks
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=OrderingDb;encrypt=false;trustServerCertificate=true
+    username: sa
+    password: Pass@word
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+ordering:
+  grace-period-ms: 30000
+  check-update-time: 30000
+
+eshop:
+  event-bus:
+    exchange-name: eshop_event_bus
+    queue-name: OrderingBackgroundTasks
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true

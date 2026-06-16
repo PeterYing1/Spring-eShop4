@@ -1,0 +1,43 @@
+server:
+  port: 5100
+
+spring:
+  application:
+    name: webmvc
+  thymeleaf:
+    cache: false
+    encoding: UTF-8
+    mode: HTML
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: mvc
+            client-secret: secret
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email,orders,basket
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:5105/realms/eshop
+            user-name-attribute: preferred_username
+
+services:
+  catalog-url: http://catalog-api:5101
+  basket-url: http://basket-api:5103
+  ordering-url: http://ordering-api:5102
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always

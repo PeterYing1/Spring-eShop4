@@ -1,0 +1,41 @@
+server:
+  port: 5121
+
+spring:
+  application:
+    name: web-shopping-aggregator
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:5105/realms/eshop
+
+urls:
+  catalog-url: http://catalog-api:5101
+  basket-url: http://basket-api:5103
+  ordering-url: http://ordering-api:5102
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

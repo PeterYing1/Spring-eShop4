@@ -1,0 +1,40 @@
+server:
+  port: 5122
+
+spring:
+  application:
+    name: mobile-shopping-aggregator
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:5105/realms/eshop
+  # WebFlux is used only for WebClient (reactive HTTP client); the servlet
+  # stack (spring-boot-starter-web) still drives inbound request handling.
+  main:
+    web-application-type: servlet
+
+urls:
+  catalog-url: http://catalog-api:5101
+  basket-url: http://basket-api:5103
+  ordering-url: http://ordering-api:5102
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

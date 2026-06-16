@@ -1,0 +1,34 @@
+version: '3.9'
+
+# Local development overrides — use host.docker.internal for cross-container identity URL
+# Run with: docker-compose -f docker-compose.yml -f docker-compose.override.yml up
+
+services:
+
+  catalog-api:
+    environment:
+      CATALOG_USE_CUSTOMIZATION_DATA: "false"
+      LOGGING_LEVEL_COM_ESHOP: DEBUG
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,metrics"
+
+  basket-api:
+    environment:
+      LOGGING_LEVEL_COM_ESHOP: DEBUG
+
+  ordering-api:
+    environment:
+      LOGGING_LEVEL_COM_ESHOP: DEBUG
+      ORDERING_CHECK_UPDATE_TIME: 30
+
+  ordering-backgroundtasks:
+    environment:
+      LOGGING_LEVEL_COM_ESHOP: DEBUG
+      ORDERING_GRACE_PERIOD_MS: 15000
+
+  payment-api:
+    environment:
+      PAYMENT_PAYMENT_SUCCEEDED: "true"
+
+  webmvc:
+    environment:
+      USE_LOAD_TEST_DATA: "false"

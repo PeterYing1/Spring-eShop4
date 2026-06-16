@@ -1,0 +1,30 @@
+server:
+  port: 5104
+
+spring:
+  application:
+    name: webspa
+  web:
+    resources:
+      static-locations: classpath:/static/
+      cache:
+        cachecontrol:
+          max-age: 3600
+          cache-public: true
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.eshop: DEBUG

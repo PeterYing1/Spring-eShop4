@@ -1,0 +1,49 @@
+server:
+  port: 5107
+
+spring:
+  application:
+    name: webstatus
+  thymeleaf:
+    cache: false
+
+management:
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: health,info
+      path-mapping:
+        health: hc
+  endpoint:
+    health:
+      show-details: always
+
+healthchecks:
+  endpoints:
+    - name: Catalog API
+      url: http://catalog-api:5101/hc
+    - name: Basket API
+      url: http://basket-api:5103/hc
+    - name: Ordering API
+      url: http://ordering-api:5102/hc
+    - name: Ordering Background Tasks
+      url: http://ordering-backgroundtasks:5111/hc
+    - name: Payment API
+      url: http://payment-api:5108/hc
+    - name: Marketing API
+      url: http://marketing-api:5110/hc
+    - name: Locations API
+      url: http://locations-api:5109/hc
+    - name: Webhooks API
+      url: http://webhooks-api:5113/hc
+    - name: Identity API
+      url: http://identity-api:5105/realms/eshop/.well-known/openid-configuration
+    - name: Web Shopping Aggregator
+      url: http://webshoppingagg:5121/hc
+    - name: Mobile Shopping Aggregator
+      url: http://mobileshoppingagg:5122/hc
+    - name: Web MVC
+      url: http://webmvc:5100/hc
+    - name: Web SPA
+      url: http://webspa:5104/hc
