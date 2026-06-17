@@ -26,22 +26,22 @@ public class WebMvcConfig implements WebMvcConfigurer {
     }
 
     @Bean(name = "catalogClient")
-    public WebClient catalogClient() {
-        return WebClient.builder()
+    public WebClient catalogClient(WebClient.Builder builder) {
+        return builder
                 .baseUrl(servicesUrlsConfig.getCatalogUrl())
                 .build();
     }
 
     @Bean(name = "basketClient")
-    public WebClient basketClient() {
-        return WebClient.builder()
+    public WebClient basketClient(WebClient.Builder builder) {
+        return builder
                 .baseUrl(servicesUrlsConfig.getBasketUrl())
                 .build();
     }
 
     @Bean(name = "orderClient")
-    public WebClient orderClient() {
-        return WebClient.builder()
+    public WebClient orderClient(WebClient.Builder builder) {
+        return builder
                 .baseUrl(servicesUrlsConfig.getOrderingUrl())
                 .build();
     }
