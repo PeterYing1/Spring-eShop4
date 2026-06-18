@@ -1,5 +1,11 @@
 server:
   port: 5100
+  servlet:
+    session:
+      tracking-modes: cookie
+      cookie:
+        same-site: lax
+        http-only: true
 
 spring:
   application:
@@ -31,6 +37,7 @@ services:
 logging:
   level:
     org.springframework.security: DEBUG
+    com.eshop.webmvc: DEBUG
 
 management:
   endpoints:

@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>eShop - Checkout</title>
+    <title>eShop - Payment</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
     <style>
         .navbar-brand { font-weight: bold; }
@@ -22,129 +22,65 @@
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/catalog}">Catalog</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/cart}">My Cart</a>
-                </li>
             </ul>
-            <ul class="navbar-nav">
+            <ul class="navbar-nav align-items-center">
                 <li class="nav-item" sec:authorize="isAuthenticated()">
                     <span class="nav-link text-light"
                           th:text="${#authentication.principal.attributes['preferred_username']}">User</span>
                 </li>
-                <li class="nav-item" sec:authorize="isAuthenticated()">
-                    <form th:action="@{/account/signout}" method="post">
-                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <button class="btn btn-link nav-link text-light" type="submit">Logout</button>
-                    </form>
+                <li class="nav-item ms-2" th:if="${basket != null and !#lists.isEmpty(basket.items)}">
+                    <span class="text-light small me-2">Ready for payment</span>
+                    <a th:href="@{/cart/payment}" class="btn btn-success btn-sm">Checkout</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<div class="container mt-4">
-    <h2>Checkout</h2>
+<div class="container mt-4" style="max-width: 720px;">
 
-    <form th:action="@{/cart/checkout}" method="post" th:object="${checkout}">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <input type="hidden" th:field="*{buyer}"/>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Payment</h3>
+        <a th:href="@{/catalog}" class="btn btn-outline-secondary btn-sm">Back to Shop</a>
+    </div>
 
-        <div class="row g-4">
+    <div th:if="${errorMsg}" class="alert alert-warning" th:text="${errorMsg}"></div>
 
-            <!-- Shipping Section -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Shipping Address</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="city" class="form-label">City</label>
-                            <input type="text" class="form-control" id="city"
-                                   th:field="*{city}" placeholder="City"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="street" class="form-label">Street</label>
-                            <input type="text" class="form-control" id="street"
-                                   th:field="*{street}" placeholder="Street address"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="state" class="form-label">State</label>
-                            <input type="text" class="form-control" id="state"
-                                   th:field="*{state}" placeholder="State"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="country" class="form-label">Country</label>
-                            <input type="text" class="form-control" id="country"
-                                   th:field="*{country}" placeholder="Country"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="zipCode" class="form-label">Zip Code</label>
-                            <input type="text" class="form-control" id="zipCode"
-                                   th:field="*{zipCode}" placeholder="Zip / Postal code"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div th:if="${basket != null and !#lists.isEmpty(basket.items)}">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Order Summary</h5>
 
-            <!-- Payment Section -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">Payment Details</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label for="cardHolderName" class="form-label">Card Holder Name</label>
-                            <input type="text" class="form-control" id="cardHolderName"
-                                   th:field="*{cardHolderName}" placeholder="Name on card"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cardNumber" class="form-label">Card Number</label>
-                            <input type="text" class="form-control" id="cardNumber"
-                                   th:field="*{cardNumber}" placeholder="XXXX XXXX XXXX XXXX"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cardExpiration" class="form-label">Expiry Date (MM/YY)</label>
-                            <input type="text" class="form-control" id="cardExpiration"
-                                   th:field="*{cardExpiration}" placeholder="MM/YY"/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cardSecurityNumber" class="form-label">CVV</label>
-                            <input type="text" class="form-control" id="cardSecurityNumber"
-                                   th:field="*{cardSecurityNumber}" placeholder="123"/>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label d-block">Card Type</label>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="cardTypeId"
-                                       id="cardTypeAmex" value="1"
-                                       th:checked="${checkout.cardTypeId == 1}"/>
-                                <label class="form-check-label" for="cardTypeAmex">Amex</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="cardTypeId"
-                                       id="cardTypeVisa" value="2"
-                                       th:checked="${checkout.cardTypeId == 2}"/>
-                                <label class="form-check-label" for="cardTypeVisa">Visa</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="radio" name="cardTypeId"
-                                       id="cardTypeMaster" value="3"
-                                       th:checked="${checkout.cardTypeId == 3}"/>
-                                <label class="form-check-label" for="cardTypeMaster">MasterCard</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <table class="table table-borderless mb-0">
+                    <tbody>
+                        <tr th:each="item : ${basket.items}">
+                            <td th:text="${item.productName}">Product Name</td>
+                            <td class="text-center text-muted"
+                                th:text="'x ' + ${item.quantity}">x 1</td>
+                            <td class="text-end fw-semibold"
+                                th:text="'$' + ${#numbers.formatDecimal(item.unitPrice.multiply(T(java.math.BigDecimal).valueOf(item.quantity.longValue())), 1, 2)}">$0.00</td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="border-top">
+                        <tr>
+                            <td colspan="2" class="fw-bold fs-5">Total</td>
+                            <td class="text-end fw-bold fs-5 text-success"
+                                th:text="'$' + ${#numbers.formatDecimal(total, 1, 2)}">$0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
 
-        <div class="d-flex gap-2 mt-4">
-            <a th:href="@{/cart}" class="btn btn-outline-secondary">Back to Cart</a>
-            <button type="submit" class="btn btn-primary">Place Order</button>
+        <div class="d-flex justify-content-end mt-3">
+            <a th:href="@{/cart/payment}" class="btn btn-success btn-lg">Place Order</a>
         </div>
-    </form>
+    </div>
+
+    <div th:if="${basket == null or #lists.isEmpty(basket.items)}" class="text-center py-5">
+        <p class="text-muted fs-5">Your basket is empty.</p>
+        <a th:href="@{/catalog}" class="btn btn-primary">Browse Catalog</a>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
