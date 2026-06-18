@@ -1,7 +1,10 @@
 package com.eshop.webmvc.config;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -9,28 +12,33 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthHelper {
 
+    private final OAuth2AuthorizedClientService authorizedClientService;
+
     /**
-     * Extracts the access token string from the current authentication.
-     * For OIDC sessions, the token is stored on the OidcUser principal.
+     * Returns the OAuth2 access token for downstream service calls.
+     * Uses the stored OAuth2AuthorizedClient to get the real access token.
+     * Falls back to the OIDC ID token if the authorized client isn't found.
      */
     public String getAccessToken(Authentication auth) {
         if (auth == null) {
             return null;
         }
         if (auth instanceof OAuth2AuthenticationToken oauthToken) {
+            OAuth2AuthorizedClient client = authorizedClientService.loadAuthorizedClient(
+                    oauthToken.getAuthorizedClientRegistrationId(),
+                    oauthToken.getName()
+            );
+            if (client != null && client.getAccessToken() != null) {
+                return client.getAccessToken().getTokenValue();
+            }
+            // Fall back to the ID token if the authorized client isn't found
             OAuth2User principal = oauthToken.getPrincipal();
-            if (principal instanceof OidcUser oidcUser) {
-                // Spring OAuth2 client stores the raw access token as an attribute
-                Object token = oidcUser.getAttribute("access_token");
-                if (token instanceof String s) {
-                    return s;
-                }
-                // Fall back to the OIDC ID token value if access_token attribute is absent
-                if (oidcUser.getIdToken() != null) {
-                    return oidcUser.getIdToken().getTokenValue();
-                }
+            if (principal instanceof OidcUser oidcUser && oidcUser.getIdToken() != null) {
+                log.warn("OAuth2AuthorizedClient not found; falling back to ID token for service calls");
+                return oidcUser.getIdToken().getTokenValue();
             }
         }
         log.warn("Could not extract access token from authentication: {}", auth.getClass().getSimpleName());
