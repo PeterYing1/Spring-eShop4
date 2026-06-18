@@ -15,8 +15,14 @@
   "clientSessionMaxLifespan": 0,
   "roles": {
     "realm": [
-      { "name": "user", "description": "User privileges" },
-      { "name": "admin", "description": "Administrator privileges" }
+      {
+        "name": "user",
+        "description": "User privileges"
+      },
+      {
+        "name": "admin",
+        "description": "Administrator privileges"
+      }
     ]
   },
   "clients": [
@@ -36,8 +42,20 @@
         "http://host.docker.internal:5104",
         "http://localhost:5104"
       ],
-      "defaultClientScopes": ["openid", "profile", "email"],
-      "optionalClientScopes": ["orders", "basket", "locations", "marketing", "webshoppingagg", "orders.signalrhub", "webhooks"]
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "orders",
+        "basket",
+        "locations",
+        "marketing",
+        "webshoppingagg",
+        "orders.signalrhub",
+        "webhooks"
+      ]
     },
     {
       "clientId": "mvc",
@@ -52,8 +70,23 @@
         "http://host.docker.internal:5100/*",
         "http://localhost:5100/*"
       ],
-      "defaultClientScopes": ["openid", "profile", "email"],
-      "optionalClientScopes": ["offline_access", "orders", "basket", "locations", "marketing", "webshoppingagg", "orders.signalrhub", "webhooks"]
+      "defaultClientScopes": [
+        "openid",
+        "profile",
+        "email",
+        "roles",
+        "web-origins"
+      ],
+      "optionalClientScopes": [
+        "offline_access",
+        "orders",
+        "basket",
+        "locations",
+        "marketing",
+        "webshoppingagg",
+        "orders.signalrhub",
+        "webhooks"
+      ]
     },
     {
       "clientId": "webhooksclient",
@@ -67,8 +100,14 @@
         "http://host.docker.internal:5114/*",
         "http://localhost:5114/*"
       ],
-      "defaultClientScopes": ["openid", "profile"],
-      "optionalClientScopes": ["offline_access", "webhooks"]
+      "defaultClientScopes": [
+        "openid",
+        "profile"
+      ],
+      "optionalClientScopes": [
+        "offline_access",
+        "webhooks"
+      ]
     },
     {
       "clientId": "basketswaggerui",
@@ -82,7 +121,9 @@
         "http://localhost:5103/*"
       ],
       "defaultClientScopes": [],
-      "optionalClientScopes": ["basket"]
+      "optionalClientScopes": [
+        "basket"
+      ]
     },
     {
       "clientId": "orderingswaggerui",
@@ -96,7 +137,9 @@
         "http://localhost:5102/*"
       ],
       "defaultClientScopes": [],
-      "optionalClientScopes": ["orders"]
+      "optionalClientScopes": [
+        "orders"
+      ]
     },
     {
       "clientId": "webshoppingaggswaggerui",
@@ -110,7 +153,10 @@
         "http://localhost:5121/*"
       ],
       "defaultClientScopes": [],
-      "optionalClientScopes": ["webshoppingagg", "basket"]
+      "optionalClientScopes": [
+        "webshoppingagg",
+        "basket"
+      ]
     },
     {
       "clientId": "mobileshoppingaggswaggerui",
@@ -124,7 +170,9 @@
         "http://localhost:5122/*"
       ],
       "defaultClientScopes": [],
-      "optionalClientScopes": ["mobileshoppingagg"]
+      "optionalClientScopes": [
+        "mobileshoppingagg"
+      ]
     },
     {
       "clientId": "locationsswaggerui",
@@ -138,7 +186,9 @@
         "http://localhost:5109/*"
       ],
       "defaultClientScopes": [],
-      "optionalClientScopes": ["locations"]
+      "optionalClientScopes": [
+        "locations"
+      ]
     },
     {
       "clientId": "marketingswaggerui",
@@ -152,7 +202,9 @@
         "http://localhost:5110/*"
       ],
       "defaultClientScopes": [],
-      "optionalClientScopes": ["marketing"]
+      "optionalClientScopes": [
+        "marketing"
+      ]
     },
     {
       "clientId": "webhooksswaggerui",
@@ -166,57 +218,266 @@
         "http://localhost:5113/*"
       ],
       "defaultClientScopes": [],
-      "optionalClientScopes": ["webhooks"]
+      "optionalClientScopes": [
+        "webhooks"
+      ]
     }
   ],
   "clientScopes": [
     {
+      "name": "openid",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false"
+      },
+      "protocolMappers": []
+    },
+    {
+      "name": "profile",
+      "description": "OpenID Connect built-in scope: profile",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "${profileScopeConsentText}"
+      },
+      "protocolMappers": [
+        {
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "username",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "full name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-full-name-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "given name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "firstName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "given_name",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "family name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "lastName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "family_name",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    },
+    {
+      "name": "email",
+      "description": "OpenID Connect built-in scope: email",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "${emailScopeConsentText}"
+      },
+      "protocolMappers": [
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "email",
+            "id.token.claim": "true",
+            "access.token.claim": "false",
+            "claim.name": "email",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "email verified",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "emailVerified",
+            "id.token.claim": "true",
+            "access.token.claim": "false",
+            "claim.name": "email_verified",
+            "jsonType.label": "boolean"
+          }
+        }
+      ]
+    },
+    {
+      "name": "roles",
+      "description": "OpenID Connect built-in scope: roles",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "${rolesScopeConsentText}"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "foo",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        },
+        {
+          "name": "client roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-client-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "foo",
+            "access.token.claim": "true",
+            "claim.name": "resource_access.${client_id}.roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        },
+        {
+          "name": "audience resolve",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-resolve-mapper",
+          "consentRequired": false,
+          "config": {}
+        }
+      ]
+    },
+    {
+      "name": "web-origins",
+      "description": "OpenID Connect built-in scope: web-origins",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "false",
+        "display.on.consent.screen": "false",
+        "consent.screen.text": ""
+      },
+      "protocolMappers": [
+        {
+          "name": "allowed web origins",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-allowed-origins-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "name": "offline_access",
+      "description": "OpenID Connect built-in scope: offline_access",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "${offlineAccessScopeConsentText}"
+      },
+      "protocolMappers": []
+    },
+    {
       "name": "orders",
       "description": "Orders Service",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     },
     {
       "name": "basket",
       "description": "Basket Service",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     },
     {
       "name": "marketing",
       "description": "Marketing Service",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     },
     {
       "name": "locations",
       "description": "Locations Service",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     },
     {
       "name": "mobileshoppingagg",
       "description": "Mobile Shopping Aggregator",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     },
     {
       "name": "webshoppingagg",
       "description": "Web Shopping Aggregator",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     },
     {
       "name": "orders.signalrhub",
       "description": "Ordering SignalR Hub",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     },
     {
       "name": "webhooks",
       "description": "Webhooks Service",
       "protocol": "openid-connect",
-      "attributes": { "include.in.token.scope": "true" }
+      "attributes": {
+        "include.in.token.scope": "true"
+      }
     }
   ],
   "users": [
@@ -235,20 +496,46 @@
         }
       ],
       "attributes": {
-        "card_number": ["4012888888881881"],
-        "security_number": ["535"],
-        "expiration": ["12/21"],
-        "card_holder_name": ["DemoUser"],
-        "card_type": ["1"],
-        "street": ["15703 NE 61st Ct"],
-        "city": ["Redmond"],
-        "state": ["WA"],
-        "country": ["U.S."],
-        "zip_code": ["98052"],
-        "name": ["DemoUser"],
-        "last_name": ["eShop"]
+        "card_number": [
+          "4012888888881881"
+        ],
+        "security_number": [
+          "535"
+        ],
+        "expiration": [
+          "12/21"
+        ],
+        "card_holder_name": [
+          "DemoUser"
+        ],
+        "card_type": [
+          "1"
+        ],
+        "street": [
+          "15703 NE 61st Ct"
+        ],
+        "city": [
+          "Redmond"
+        ],
+        "state": [
+          "WA"
+        ],
+        "country": [
+          "U.S."
+        ],
+        "zip_code": [
+          "98052"
+        ],
+        "name": [
+          "DemoUser"
+        ],
+        "last_name": [
+          "eShop"
+        ]
       },
-      "realmRoles": ["user"]
+      "realmRoles": [
+        "user"
+      ]
     }
   ],
   "protocolMappers": [

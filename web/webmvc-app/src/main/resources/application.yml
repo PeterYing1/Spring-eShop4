@@ -16,7 +16,7 @@ spring:
             client-id: mvc
             client-secret: secret
             authorization-grant-type: authorization_code
-            scope: openid,profile,email,orders,basket
+            scope: openid,profile,email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
@@ -27,6 +27,10 @@ services:
   catalog-url: http://catalog-api:5101
   basket-url: http://basket-api:5103
   ordering-url: http://ordering-api:5102
+
+logging:
+  level:
+    org.springframework.security: DEBUG
 
 management:
   endpoints:

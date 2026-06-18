@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -30,6 +29,9 @@ public class SecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .defaultSuccessUrl("/catalog", true)
+                .authorizationEndpoint(endpoint -> endpoint
+                    .authorizationRequestRepository(new StateKeyedOAuth2AuthorizationRequestRepository())
+                )
             )
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/account/signout"))
